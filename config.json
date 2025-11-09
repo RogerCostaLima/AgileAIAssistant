@@ -1,0 +1,14 @@
+{
+    "api_keys": {
+        "gemini": "",
+        "chatgpt": "",
+        "copilot": ""
+    },
+    "ia_role": "Você é especialista em metodologias ágeis...",
+    "prompts": {
+        "epic": "Crie um Épico com base no contexto fornecido, descrevendo visão, objetivo e impacto.",
+        "feature": "Crie uma Feature derivada do épico, com foco em resultado e valor para o negócio.",
+        "user_story": "Crie uma User Story com formato: 'Como [tipo de usuário], quero [funcionalidade] para [benefício]'.",
+        "task": "Crie uma Task derivada da User Story, com instruções claras de execução."
+    }
+}
