@@ -8,14 +8,15 @@ import requests
 def gerar_resposta_gemini(prompt, api_key):
     try:
         genai.configure(api_key=api_key)
+        # Lista modelos compatíveis com generateContent
         modelos_disponiveis = [
-            m.name for m in genai.list_models()
+            m.name for m in genai.list_models() 
             if "generateContent" in m.supported_generation_methods
         ]
         if not modelos_disponiveis:
             return "[Gemini] Nenhum modelo disponível para generateContent."
         
-        model_name = modelos_disponiveis[0]
+        model_name = modelos_disponiveis[0]  # usa o primeiro modelo válido
         model = genai.GenerativeModel(model_name)
         response = model.generate_content(prompt)
         return response.text
