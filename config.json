@@ -1,8 +1,8 @@
 {
     "api_keys": {
-        "gemini": "",
-        "chatgpt": "",
-        "copilot": ""
+        "gemini": "FAKE-GEMINI-KEY-123",
+        "chatgpt": "FAKE-CHATGPT-KEY-456",
+        "copilot": "FAKE-COPILOT-KEY-789"
     },
     "ia_role": "Você é especialista em metodologias ágeis...",
     "prompts": {
