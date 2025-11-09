@@ -1,9 +1,13 @@
+# app.py
 import streamlit as st
 import json
+import time
 from ia_models import gerar_resposta_gemini, gerar_resposta_gpt, gerar_resposta_copilot
 from utils import exportar_artefatos, baixar_excel, extrair_texto_ppt
 import pandas as pd
-import time
+import requests
+#from streamlit_lottie import st_lottie
+
 
 # =====================
 # CONFIGURAÇÃO DE PÁGINA
@@ -19,6 +23,15 @@ except FileNotFoundError:
     st.stop()
 
 # =====================
+# FUNÇÃO PARA LOTTIE
+# =====================
+def load_lottie_url(url: str):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
+
+# =====================
 # MENU LATERAL
 # =====================
 st.sidebar.title("🤖 Assistente Ágil")
@@ -28,9 +41,9 @@ menu_option = st.sidebar.radio(
 )
 
 # =====================
-# CONFIGURAÇÕES
+# CONFIGURAÇÕES DE IA
 # =====================
-if menu_option == "🔧 Configurações de IA":
+if menu_option == "⚙️ Configurações de IA":
     st.header("Configurações Avançadas da IA")
 
     # Chaves de API
@@ -42,7 +55,7 @@ if menu_option == "🔧 Configurações de IA":
             type="password"
         )
 
-    # Como a IA deve atuar
+    # Papel da IA
     st.subheader("Como a IA deve atuar")
     config["ia_role"] = st.text_area(
         "Descreva como a IA deve atuar (ex: Especialista em Metodologia Ágil, seguindo práticas do playbook fornecido)",
@@ -53,8 +66,7 @@ if menu_option == "🔧 Configurações de IA":
     # Upload do PPT (Playbook ágil)
     arquivo_ppt = st.file_uploader("📄 Upload de Playbook em PPT (opcional)", type=["pptx"])
     if arquivo_ppt:
-        texto_ppt = extrair_texto_ppt(arquivo_ppt)
-        config["playbook_text"] = texto_ppt
+        config["playbook_text"] = extrair_texto_ppt(arquivo_ppt)
         st.success("Playbook carregado e processado com sucesso!")
 
     # Prompts padrão
@@ -78,9 +90,9 @@ elif menu_option == "ℹ️ Sobre":
     st.title("🤖 Assistente Ágil IA")
     st.markdown("""
     - Gera Épicos, Features, User Stories e Tasks automaticamente.
-    - Feedback visual por etapa de geração.
+    - Feedback visual por etapa de geração com timeline.
     - Exportação pronta para Azure DevOps (CSV/Excel).
-    - IA configurável como especialista e com referência de playbook.
+    - Integração com Gemini, ChatGPT e Copilot.
     """)
 
 # =====================
@@ -104,15 +116,23 @@ elif menu_option == "🧠 Geração de Artefatos":
             cols = st.columns(4)
             artefatos = ["epic", "feature", "user_story", "task"]
 
+            # Carregar Lottie de loading
+            lottie_url = "https://assets4.lottiefiles.com/packages/lf20_usmfx6bp.json"
+            lottie_json = load_lottie_url(lottie_url)
+
             # Criar cards de status
             for i, tipo in enumerate(artefatos):
-                status_placeholders[tipo] = cols[i].empty()
-                status_placeholders[tipo].info(f"⏳ {tipo.upper()} processando...")
+                with cols[i]:
+                    st.markdown(f"### {tipo.upper()}")
+                    if lottie_json:
+                        #st_lottie(lottie_json, height=80, key=f"lottie_{tipo}")
+                        st.info("⏳ Processando...")  # ou st.progress() se quiser barra
+                    status_placeholders[tipo] = st.empty()
+                    status_placeholders[tipo].info(f"⏳ {tipo.upper()} processando...")
 
-            # Gerar artefatos
+            # Processa cada artefato
             for tipo in artefatos:
-                # Construir prompt final
-                prompt_final = f"{config.get('ia_role','')} \n\n"
+                prompt_final = f"{config.get('ia_role','')}\n\n"
                 if "playbook_text" in config:
                     prompt_final += f"{config['playbook_text']}\n\n"
                 prompt_final += f"{config['prompts'][tipo]}\n\nContexto:\n{contexto}\nNotas:\n{notas}"
@@ -133,7 +153,6 @@ elif menu_option == "🧠 Geração de Artefatos":
                 st.markdown(f"### {tipo.upper()}")
                 st.info(resultados[tipo])
 
-            # Salvar para exportação
             st.session_state["resultados"] = resultados
 
 # =====================
